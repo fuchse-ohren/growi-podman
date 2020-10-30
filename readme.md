@@ -2,10 +2,13 @@
 
 Podmanを使用したgrowiのクイックスタート
 
-
+# 事前準備
+growi-podmanのディレクトリ内にgrowi-docker-composeをcloneする
+```shell
+git clone https://github.com/weseek/growi-docker-compose.git
+```
 
 # 実行手順
-
 1. はじめにelasticsearchのコンテナをビルドする
 
 ```shell
