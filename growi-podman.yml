@@ -1,0 +1,85 @@
+#
+#  注意点
+#    このpodはメモリを4GB程度使用します。
+#    実機にこれ以上のリソースを確保してから実行してください。
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: growi
+spec:
+  restartPolicy: Always
+  volumes:
+    - name: growi_data
+      hostPath:
+        path: #/var/wiki/growi #growiのデータ保存先
+    - name: mongo_config
+      hostPath:
+        path: #/var/wiki/configdb #mongodbのconfig保存先
+    - name: mongo_db
+      hostPath:
+        path: #/var/wiki/db #mongodbのdb保存先
+    - name: es_data
+      hostPath:
+        path: #/var/wiki/elasticsearch/data #elasticsearchのデータ保存先
+    - name: es_conf
+      hostPath:
+        path: #/var/wiki/elasticsearch/elasticsearch.yml #elasticsearchの設定ファイル
+
+  containers:
+    - name: mongo-container
+      image: docker.io/mongo
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: mongo_config
+          mountPath: /data/configdb
+        - name: mongo_db
+          mountPath: /data/db
+      resources:
+        requests:
+          memory: "768Mi"
+
+    - name: elasticsearch-container
+      image: localhost/elasticsearch
+      imagePullPolicy: Never
+      env:
+        - name: bootstrap.memory_lock
+          value: true
+        - name: ES_JAVA_OPTS
+          value: -Xms1792m -Xmx1792m
+      resources:
+        requests:
+          memory: "2Gi"
+      volumeMounts:
+        - name: es_data
+          mountPath: /usr/share/elasticsearch/data
+        - name: es_conf
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+
+    - name: growi-container
+      image: weseek/growi
+      imagePullPolicy: Always
+      workingDir: /opt/growi
+      env:
+        - name: PORT
+          value: 3000
+        - name: NODE_ENV
+          value: production
+        - name: MONGO_URI
+          value: mongodb://localhost:27017/growi
+        - name: ELASTICSEARCH_URI
+          value: http://localhost:9200/growi
+        - name: PASSWORD_SEED
+          value: #change me #openssl rand -base64 128 | head -1 でシードを生成してセット
+        - name: FILE_UPLOAD
+          value: local
+      resources:
+        memory: "768Mi"
+      #command: ["dockerize","-wait tcp://localhost:27017 -timeout 60s npm run server:prod"]
+      ports:
+        - containerPort: 3000
+          hostPort: 3000
+          protocol: TCP
+      volumeMounts:
+        - name: growi_data
+          mountPath: /data
