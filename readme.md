@@ -32,6 +32,7 @@ chmod 666 /var/wiki/elasticsearch/elasticsearch.yml
 
 ```shell
 sudo semanage fcontext -a -t container_file_t "/var/wiki(/.*)?"
+sudo restorecon -RF /var/wiki
 ```
 
 4. growi-podman.ymlファイル内のPASSWORD_SEEDを変更する。
