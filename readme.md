@@ -31,7 +31,7 @@ chmod 666 /var/wiki/elasticsearch/elasticsearch.yml
 3. SELinuxを有効にしている場合はこのコマンドでpodmanからのアクセスができるようにしておく
 
 ```shell
-sudo semanage fcontext -a -t httpd_sys_content_t "/var/wiki(/.*)?"
+sudo semanage fcontext -a -t container_file_t "/var/wiki(/.*)?"
 ```
 
 4. growi-podman.ymlファイル内のPASSWORD_SEEDを変更する。
